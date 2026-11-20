@@ -1,0 +1,34 @@
+name: Sync lite.html
+
+on:
+  workflow_dispatch:        # run manually from the Actions tab
+  schedule:
+    - cron: "0 * * * *"     # hourly; adjust or remove as needed
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Download lite.html as index.html
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/isaidgg5/bookish-pancake/HEAD/lite.html" \
+            -o index.html
+
+      - name: Commit and push if changed
+        run: |
+          if [[ -n "$(git status --porcelain index.html)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "Sync index.html from isaidgg5/bookish-pancake lite.html"
+            git push
+          else
+            echo "No changes."
+          fi
